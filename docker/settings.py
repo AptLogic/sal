@@ -101,7 +101,7 @@ if USE_SAML:
 
     SAML_DJANGO_USER_MAIN_ATTRIBUTE = os.environ.get("SAML_USER_MAIN_ATTR", "email")
     SAML_USE_NAME_ID_AS_USERNAME = os.environ.get("SAML_NAME_ID_AS_USERNAME", True)
-    SAML_CREATE_UNKNOWN_USER = os.environ.get("SAML_CREATE_UNKNOWN_USER:", True)
+    SAML_CREATE_UNKNOWN_USER = os.environ.get("SAML_CREATE_UNKNOWN_USER", True)
     SAML_ATTRIBUTE_MAPPING = {
         "uid": (os.environ.get("SAML_ATTR_MAP_UID", "username"),),
         "mail": (os.environ.get("SAML_ATTR_MAP_MAIL", "email"),),
