@@ -220,4 +220,3 @@ if USE_SAML:
         #     },
         "valid_for": 24,  # how long is our metadata valid
     }
-
