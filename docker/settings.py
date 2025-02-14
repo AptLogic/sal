@@ -99,14 +99,14 @@ if USE_SAML:
     import saml2
     from saml2.saml import NAMEID_FORMAT_PERSISTENT
 
-    SAML_DJANGO_USER_MAIN_ATTRIBUTE = "email"
-    SAML_USE_NAME_ID_AS_USERNAME = True
-    SAML_CREATE_UNKNOWN_USER = True
+    SAML_DJANGO_USER_MAIN_ATTRIBUTE = os.environ.get("SAML_USER_MAIN_ATTR", "email")
+    SAML_USE_NAME_ID_AS_USERNAME = os.environ.get("SAML_NAME_ID_AS_USERNAME", True)
+    SAML_CREATE_UNKNOWN_USER = os.environ.get("SAML_CREATE_UNKNOWN_USER:", True)
     SAML_ATTRIBUTE_MAPPING = {
-        "uid": ("username",),
-        "mail": ("email",),
-        "cn": ("first_name",),
-        "sn": ("last_name",),
+        "uid": (os.environ.get("SAML_ATTR_MAP_UID", "username"),),
+        "mail": (os.environ.get("SAML_ATTR_MAP_MAIL", "email"),),
+        "cn": (os.environ.get("SAML_ATTR_MAP_CN", "first_name"),),
+        "sn": (os.envrion.get("SAML_ATTR_MAP_SN", "last_name"),),
     }
 
     logging_config = get_sal_logging_config()
@@ -128,7 +128,7 @@ if USE_SAML:
         "djangosaml2.backends.Saml2Backend",
     )
 
-    LOGIN_URL = "/saml2/login/"
+    LOGIN_URL = os.environ.get("SAML_LOGIN_URL", "/saml2/login/")
     SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
     BASEDIR = path.dirname(path.abspath(__file__))
@@ -136,11 +136,11 @@ if USE_SAML:
         # full path to the xmlsec1 binary programm
         "xmlsec_binary": "/usr/bin/xmlsec1",
         # your entity id, usually your subdomain plus the url to the metadata view
-        "entityid": "https://sal.example.com/saml2/metadata/",
+        "entityid": os.environ.get("SAML_CFG_ENTITYID","https://sal.example.com/saml2/metadata/"),
         # directory with attribute mapping
         "attribute_map_dir": path.join(BASEDIR, "attributemaps"),
         # this block states what services we provide
-        "allow_unknown_attributes": True,
+        "allow_unknown_attributes": os.environ.get("SAML_CFG_ALLOW_UNKNOWN_ATTRS", True),
         "service": {
             # we are just a lonely SP
             "sp": {
@@ -148,23 +148,23 @@ if USE_SAML:
                 "allow_unsolicited": True,
                 "want_assertions_signed": True,
                 "allow_unknown_attributes": True,
-                "name": "Federated Django sample SP",
+                "name": "Sal",
                 "name_id_format": NAMEID_FORMAT_PERSISTENT,
                 "endpoints": {
                     # url and binding to the assetion consumer service view
                     # do not change the binding or service name
                     "assertion_consumer_service": [
-                        ("https://sal.example.com/saml2/acs/", saml2.BINDING_HTTP_POST),
+                        (os.environ.get("SAML_SP_ACS_URL","https://sal.example.com/saml2/acs/"), saml2.BINDING_HTTP_POST),
                     ],
                     # url and binding to the single logout service view
                     # do not change the binding or service name
                     "single_logout_service": [
                         (
-                            "https://sal.example.com/saml2/ls/",
+                            os.environ.get("SAML_SP_SLS_REDIR_URL","https://sal.example.com/saml2/ls/"),
                             saml2.BINDING_HTTP_REDIRECT,
                         ),
                         (
-                            "https://sal.example.com/saml2/ls/post",
+                            os.environ.get("SAML_SP_SLS_POST_URL","https://sal.example.com/saml2/ls/post"),
                             saml2.BINDING_HTTP_POST,
                         ),
                     ],
@@ -179,12 +179,12 @@ if USE_SAML:
                     # only an IdP defined here. This IdP should be
                     # present in our metadata
                     # the keys of this dictionary are entity ids
-                    "https://YOURID": {
+                    os.environ.get("SAML_IDP_ID_URL","https://YOURID"): {
                         "single_sign_on_service": {
-                            saml2.BINDING_HTTP_REDIRECT: "https://YOURSSOURL",
+                            saml2.BINDING_HTTP_REDIRECT: os.environ.get("SAML_IDP_SSO_URL","https://YOURSSOURL"),
                         },
                         "single_logout_service": {
-                            saml2.BINDING_HTTP_REDIRECT: "https://YOURSLOURL",
+                            saml2.BINDING_HTTP_REDIRECT: os.environ.get("SAML_IDP_SLS_URL","https://YOURSLOURL"),
                         },
                     },
                 },
