@@ -106,7 +106,7 @@ if USE_SAML:
         "uid": (os.environ.get("SAML_ATTR_MAP_UID", "username"),),
         "mail": (os.environ.get("SAML_ATTR_MAP_MAIL", "email"),),
         "cn": (os.environ.get("SAML_ATTR_MAP_CN", "first_name"),),
-        "sn": (os.envrion.get("SAML_ATTR_MAP_SN", "last_name"),),
+        "sn": (os.environ.get("SAML_ATTR_MAP_SN", "last_name"),),
     }
 
     logging_config = get_sal_logging_config()
