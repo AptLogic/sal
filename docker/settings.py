@@ -102,11 +102,15 @@ if USE_SAML:
     SAML_DJANGO_USER_MAIN_ATTRIBUTE = os.environ.get("SAML_USER_MAIN_ATTR", "email")
     SAML_USE_NAME_ID_AS_USERNAME = os.environ.get("SAML_NAME_ID_AS_USERNAME", True)
     SAML_CREATE_UNKNOWN_USER = os.environ.get("SAML_CREATE_UNKNOWN_USER", True)
+    SAML_ATTR_NAME_UID = os.environ.get("SAML_ATTR_NAME_UID", "uid")
+    SAML_ATTR_NAME_MAIL = os.environ.get("SAML_ATTR_NAME_MAIL", "mail")
+    SAML_ATTR_NAME_CN = os.environ.get("SAML_ATTR_NAME_CN", "cn")
+    SAML_ATTR_NAME_SN = os.environ.get("SAML_ATTR_NAME_SN", "sn")
     SAML_ATTRIBUTE_MAPPING = {
-        "uid": (os.environ.get("SAML_ATTR_MAP_UID", "username"),),
-        "mail": (os.environ.get("SAML_ATTR_MAP_MAIL", "email"),),
-        "cn": (os.environ.get("SAML_ATTR_MAP_CN", "first_name"),),
-        "sn": (os.environ.get("SAML_ATTR_MAP_SN", "last_name"),),
+        SAML_ATTR_NAME_UID: (os.environ.get("SAML_ATTR_MAP_UID", "username"),),
+        SAML_ATTR_NAME_MAIL: (os.environ.get("SAML_ATTR_MAP_MAIL", "email"),),
+        SAML_ATTR_NAME_CN: (os.environ.get("SAML_ATTR_MAP_CN", "first_name"),),
+        SAML_ATTR_NAME_SN: (os.environ.get("SAML_ATTR_MAP_SN", "last_name"),),
     }
 
     logging_config = get_sal_logging_config()
