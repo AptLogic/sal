@@ -213,7 +213,8 @@ if USE_SAML:
         "debug": 1,
         # certificate
         # 'key_file': path.join(BASEDIR, 'mycert.key'),  # private part
-        # 'cert_file': path.join(BASEDIR, 'mycert.pem'),  # public part
+        
+        'cert_file': path.join(BASEDIR, 'cert.pem'),  # public part
         # own metadata settings
         # 'contact_person': [
         #     {'given_name': 'Lorenzo',
