@@ -144,7 +144,7 @@ if USE_SAML:
     SAML_IDP_ID_URL = os.environ.get("SAML_IDP_ID_URL","https://YOURID")
     SAML_IDP_SSO_URL = os.environ.get("SAML_IDP_SSO_URL","https://YOURSSOURL")
     SAML_IDP_SLS_URL = os.environ.get("SAML_IDP_SLS_URL","https://YOURSLOURL")
-
+    SAML_IDP_META_URL = os.environ.get("SAML_METADATA_URL")
 
     BASEDIR = path.dirname(path.abspath(__file__))
     SAML_CONFIG = {
@@ -207,14 +207,14 @@ if USE_SAML:
         },
         # where the remote metadata is stored
         "metadata": {
-            "local": [path.join(BASEDIR, "metadata.xml")],
+            "remote": SAML_IDP_META_URL,
         },
         # set to 1 to output debugging information
         "debug": 1,
         # certificate
         # 'key_file': path.join(BASEDIR, 'mycert.key'),  # private part
         
-        'cert_file': path.join(BASEDIR, 'cert.pem'),  # public part
+        #'cert_file': path.join(BASEDIR, 'cert.pem'),  # public part
         # own metadata settings
         # 'contact_person': [
         #     {'given_name': 'Lorenzo',
