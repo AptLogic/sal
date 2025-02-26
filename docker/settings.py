@@ -207,7 +207,11 @@ if USE_SAML:
         },
         # where the remote metadata is stored
         "metadata": {
-            "remote": SAML_IDP_META_URL,
+            "remote": [
+                {
+                    "url": SAML_IDP_META_URL
+                },
+            ],
         },
         # set to 1 to output debugging information
         "debug": 1,
