@@ -162,6 +162,7 @@ if USE_SAML:
                 "authn_requests_signed": False,
                 "allow_unsolicited": True,
                 "want_assertions_signed": True,
+                "want_response_signed": False,
                 "allow_unknown_attributes": True,
                 "name": "Sal",
                 "name_id_format": NAMEID_FORMAT_PERSISTENT,
