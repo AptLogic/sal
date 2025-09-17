@@ -99,14 +99,18 @@ if USE_SAML:
     import saml2
     from saml2.saml import NAMEID_FORMAT_PERSISTENT
 
-    SAML_DJANGO_USER_MAIN_ATTRIBUTE = "email"
-    SAML_USE_NAME_ID_AS_USERNAME = True
-    SAML_CREATE_UNKNOWN_USER = True
+    SAML_DJANGO_USER_MAIN_ATTRIBUTE = os.environ.get("SAML_USER_MAIN_ATTR", "email")
+    SAML_USE_NAME_ID_AS_USERNAME = os.environ.get("SAML_NAME_ID_AS_USERNAME", True)
+    SAML_CREATE_UNKNOWN_USER = os.environ.get("SAML_CREATE_UNKNOWN_USER", True)
+    SAML_ATTR_NAME_UID = os.environ.get("SAML_ATTR_NAME_UID", "uid")
+    SAML_ATTR_NAME_MAIL = os.environ.get("SAML_ATTR_NAME_MAIL", "mail")
+    SAML_ATTR_NAME_CN = os.environ.get("SAML_ATTR_NAME_CN", "cn")
+    SAML_ATTR_NAME_SN = os.environ.get("SAML_ATTR_NAME_SN", "sn")
     SAML_ATTRIBUTE_MAPPING = {
-        "uid": ("username",),
-        "mail": ("email",),
-        "cn": ("first_name",),
-        "sn": ("last_name",),
+        SAML_ATTR_NAME_UID: (os.environ.get("SAML_ATTR_MAP_UID", "username"),),
+        SAML_ATTR_NAME_MAIL: (os.environ.get("SAML_ATTR_MAP_MAIL", "email"),),
+        SAML_ATTR_NAME_CN: (os.environ.get("SAML_ATTR_MAP_CN", "first_name"),),
+        SAML_ATTR_NAME_SN: (os.environ.get("SAML_ATTR_MAP_SN", "last_name"),),
     }
 
     logging_config = get_sal_logging_config()
@@ -128,43 +132,55 @@ if USE_SAML:
         "djangosaml2.backends.Saml2Backend",
     )
 
-    LOGIN_URL = "/saml2/login/"
+    LOGIN_URL = os.environ.get("SAML_LOGIN_URL", "/saml2/login/")
     SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+    # Pull SAML configs from environment variables (if they exist)
+    SAML_CFG_ENTITYID = os.environ.get("SAML_CFG_ENTITYID","https://sal.example.com/saml2/metadata/")
+    SAML_CFG_ALLOW_UNKNOWN_ATTRS = os.environ.get("SAML_CFG_ALLOW_UNKNOWN_ATTRS", True)
+    SAML_SP_ACS_URL = os.environ.get("SAML_SP_ACS_URL","https://sal.example.com/saml2/acs/")
+    SAML_SP_SLS_REDIR_URL = os.environ.get("SAML_SP_SLS_REDIR_URL","https://sal.example.com/saml2/ls/")
+    SAML_SP_SLS_POST_URL = os.environ.get("SAML_SP_SLS_POST_URL","https://sal.example.com/saml2/ls/post")   
+    SAML_IDP_ID_URL = os.environ.get("SAML_IDP_ID_URL","https://YOURID")
+    SAML_IDP_SSO_URL = os.environ.get("SAML_IDP_SSO_URL","https://YOURSSOURL")
+    SAML_IDP_SLS_URL = os.environ.get("SAML_IDP_SLS_URL","https://YOURSLOURL")
+    SAML_IDP_META_URL = os.environ.get("SAML_METADATA_URL")
 
     BASEDIR = path.dirname(path.abspath(__file__))
     SAML_CONFIG = {
         # full path to the xmlsec1 binary programm
         "xmlsec_binary": "/usr/bin/xmlsec1",
         # your entity id, usually your subdomain plus the url to the metadata view
-        "entityid": "https://sal.example.com/saml2/metadata/",
+        "entityid": SAML_CFG_ENTITYID,
         # directory with attribute mapping
         "attribute_map_dir": path.join(BASEDIR, "attributemaps"),
         # this block states what services we provide
-        "allow_unknown_attributes": True,
+        "allow_unknown_attributes": SAML_CFG_ALLOW_UNKNOWN_ATTRS,
         "service": {
             # we are just a lonely SP
             "sp": {
                 "authn_requests_signed": False,
                 "allow_unsolicited": True,
                 "want_assertions_signed": True,
+                "want_response_signed": False,
                 "allow_unknown_attributes": True,
-                "name": "Federated Django sample SP",
+                "name": "Sal",
                 "name_id_format": NAMEID_FORMAT_PERSISTENT,
                 "endpoints": {
                     # url and binding to the assetion consumer service view
                     # do not change the binding or service name
                     "assertion_consumer_service": [
-                        ("https://sal.example.com/saml2/acs/", saml2.BINDING_HTTP_POST),
+                        (SAML_SP_ACS_URL, saml2.BINDING_HTTP_POST),
                     ],
                     # url and binding to the single logout service view
                     # do not change the binding or service name
                     "single_logout_service": [
                         (
-                            "https://sal.example.com/saml2/ls/",
+                            SAML_SP_SLS_REDIR_URL,
                             saml2.BINDING_HTTP_REDIRECT,
                         ),
                         (
-                            "https://sal.example.com/saml2/ls/post",
+                            SAML_SP_SLS_POST_URL,
                             saml2.BINDING_HTTP_POST,
                         ),
                     ],
@@ -179,12 +195,12 @@ if USE_SAML:
                     # only an IdP defined here. This IdP should be
                     # present in our metadata
                     # the keys of this dictionary are entity ids
-                    "https://YOURID": {
+                    SAML_IDP_ID_URL: {
                         "single_sign_on_service": {
-                            saml2.BINDING_HTTP_REDIRECT: "https://YOURSSOURL",
+                            saml2.BINDING_HTTP_REDIRECT: SAML_IDP_SSO_URL,
                         },
                         "single_logout_service": {
-                            saml2.BINDING_HTTP_REDIRECT: "https://YOURSLOURL",
+                            saml2.BINDING_HTTP_REDIRECT: SAML_IDP_SLS_URL,
                         },
                     },
                 },
@@ -192,13 +208,18 @@ if USE_SAML:
         },
         # where the remote metadata is stored
         "metadata": {
-            "local": [path.join(BASEDIR, "metadata.xml")],
+            "remote": [
+                {
+                    "url": SAML_IDP_META_URL
+                },
+            ],
         },
         # set to 1 to output debugging information
         "debug": 1,
         # certificate
         # 'key_file': path.join(BASEDIR, 'mycert.key'),  # private part
-        # 'cert_file': path.join(BASEDIR, 'mycert.pem'),  # public part
+        
+        #'cert_file': path.join(BASEDIR, 'cert.pem'),  # public part
         # own metadata settings
         # 'contact_person': [
         #     {'given_name': 'Lorenzo',

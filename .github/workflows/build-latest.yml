@@ -23,12 +23,4 @@ jobs:
       with:
         context: .
         push: true
-        tags: ghcr.io/salopensource/sal:latest
-    
-    - name: Build and Push SAML Docker image
-      uses: docker/build-push-action@v6.9.0
-      with:
-        context: .
-        file: Dockerfile-SAML
-        push: true
-        tags: ghcr.io/salopensource/sal-saml:latest
+        tags: ghcr.io/aptlogic/sal:latest

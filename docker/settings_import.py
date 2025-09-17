@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 
-import locale
-from os import getenv
+import locale, urllib.request
+from os import getenv, path
 
 from sal.system_settings import *
 
@@ -135,5 +135,13 @@ try:
         USE_SAML = True
     else:
         USE_SAML = False
+except Exception:
+    USE_SAML = False
+
+# Attempt to download SAML metadata definition and cert, if exists
+try:
+    if getenv("SAML_METADATA_URL"):
+        DLPATH = path.join(path.dirname(path.abspath(__file__)), "metadata.xml")
+        urllib.request.urlretrieve(getenv("SAML_METADATA_URL"), DLPATH)
 except Exception:
     USE_SAML = False
