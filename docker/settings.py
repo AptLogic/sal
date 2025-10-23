@@ -94,6 +94,7 @@ if "AWS_IAM" in os.environ:
         }
     }
 
+ADD_TO_ALL_BUSINESS_UNITS = os.environ.get("ADD_TO_ALL_BUSINESS_UNITS", "False")
 
 if USE_SAML:
     import saml2
