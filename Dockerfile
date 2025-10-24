@@ -14,12 +14,12 @@ ENV WAIT_FOR_POSTGRES=false
 ENV MAINT_FREQUENCY=300
 ENV LC_ALL=en_US.UTF-8
 
-RUN apt update && apt clean && \
+RUN apt-get update && \
     mkdir -p /usr/share/man/man1 && \
     mkdir -p /usr/share/man/man7 && \
-    apt install -y libc-bin && \
-    apt -y update && \
-    apt -y install \
+    apt-get install -y libc-bin && \
+    apt-get -y update && \
+    apt-get -y install \
     build-essential \
     cron \
     git \
@@ -34,7 +34,7 @@ RUN apt update && apt clean && \
     libxmlsec1-dev \
     libxml2-dev \ 
     xmlsec1 && \
-    apt clean && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     mkdir /tmp/setup
 COPY setup/requirements.txt /tmp/setup/requirements.txt
