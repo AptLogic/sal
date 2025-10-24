@@ -13,15 +13,13 @@ ENV DOCKER_SAL_DEBUG=false
 ENV WAIT_FOR_POSTGRES=false
 ENV MAINT_FREQUENCY=300
 ENV LC_ALL=en_US.UTF-8
-# ENV DOCKERIZE_VERSION v0.3.0
 
-RUN apt-get update && apt-get clean && \
+RUN apt update && apt clean && \
     mkdir -p /usr/share/man/man1 && \
     mkdir -p /usr/share/man/man7 && \
-    apt-get install -y libc-bin && \
-    apt-get install -y software-properties-common && \
-    apt-get -y update && \
-    apt-get -y install \
+    apt install -y libc-bin && \
+    apt -y update && \
+    apt -y install \
     build-essential \
     cron \
     git \
@@ -36,7 +34,7 @@ RUN apt-get update && apt-get clean && \
     libxmlsec1-dev \
     libxml2-dev \ 
     xmlsec1 && \
-    apt-get clean && \
+    apt clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     mkdir /tmp/setup
 COPY setup/requirements.txt /tmp/setup/requirements.txt
@@ -70,8 +68,6 @@ RUN chmod 755 /run.sh && \
     touch $APP_DIR/sal.log &&\
     chmod 777 $APP_DIR/sal.log
 
-#&& \
-#find . -name $APP_DIR/\*.pyc -delete
 
 WORKDIR $APP_DIR
 EXPOSE 8000
