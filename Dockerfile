@@ -1,5 +1,5 @@
 # Sal Dockerfile
-FROM python:3.9.19-slim-bullseye
+FROM python:3.14.0-slim-trixie
 
 ENV HOME /root
 ENV DEBIAN_FRONTEND noninteractive
