@@ -1,21 +1,21 @@
 # Sal Dockerfile
 FROM python:3.14.0-slim-trixie
 
-ENV HOME /root
-ENV DEBIAN_FRONTEND noninteractive
-ENV APPNAME Sal
-ENV APP_DIR /home/docker/sal
-ENV DOCKER_SAL_TZ Europe/London
-ENV DOCKER_SAL_ADMINS Docker User, docker@localhost
-ENV DOCKER_SAL_LANG en-us
-ENV DOCKER_SAL_DISPLAY_NAME Sal
-ENV DOCKER_SAL_DEBUG false
-ENV WAIT_FOR_POSTGRES false
-ENV MAINT_FREQUENCY 300
-ENV LC_ALL en_US.UTF-8
+ENV HOME=/root
+ENV DEBIAN_FRONTEND=noninteractive
+ENV APPNAME=Sal
+ENV APP_DIR=/home/docker/sal
+ENV DOCKER_SAL_TZ=Europe/London
+ENV DOCKER_SAL_ADMINS="Docker User, docker@localhost"
+ENV DOCKER_SAL_LANG=en-us
+ENV DOCKER_SAL_DISPLAY_NAME=Sal
+ENV DOCKER_SAL_DEBUG=false
+ENV WAIT_FOR_POSTGRES=false
+ENV MAINT_FREQUENCY=300
+ENV LC_ALL=en_US.UTF-8
 # ENV DOCKERIZE_VERSION v0.3.0
 
-RUN apt-get update && \
+RUN apt-get update && apt-get clean && \
     mkdir -p /usr/share/man/man1 && \
     mkdir -p /usr/share/man/man7 && \
     apt-get install -y libc-bin && \
