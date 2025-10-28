@@ -16,7 +16,7 @@ services:
   sal:
     depends_on:
       - db
-    image: ghcr.io/salopensource/sal
+    image: ghcr.io/aptlogic/sal:latest
     ports:
       - "80:8000"
     restart: always
