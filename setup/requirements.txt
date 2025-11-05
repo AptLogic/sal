@@ -19,3 +19,4 @@ uritemplate==4.2.0
 urllib3==2.5.0
 Yapsy @ git+https://github.com/AmeyaVS/yapsy.git@d3fbf8cc42a97d8cdf62f7ad24a8abc830ce890a#subdirectory=package
 djangosaml2==1.11.1
+django-csp==4.0

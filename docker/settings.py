@@ -127,7 +127,18 @@ if USE_SAML:
     update_sal_logging_config(logging_config)
 
     INSTALLED_APPS += ("djangosaml2",)
-
+    MIDDLEWARE = (
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "djangosaml2.middleware.SamlSessionMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "server.middleware.AddToBU.AddToBU",
+    "search.current_user.CurrentUserMiddleware",
+    )
     AUTHENTICATION_BACKENDS = (
         "django.contrib.auth.backends.ModelBackend",
         "djangosaml2.backends.Saml2Backend",
