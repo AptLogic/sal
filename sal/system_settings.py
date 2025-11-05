@@ -2,7 +2,7 @@ import logging.config
 import os
 
 
-DEBUG = False
+DEBUG = os.environ.get("DEBUG", False)
 APPEND_SLASH = True
 PROJECT_DIR = os.path.abspath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.pardir)
