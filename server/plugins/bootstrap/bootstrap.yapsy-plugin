@@ -1,0 +1,9 @@
+[Core]
+Name = Bootstrap
+Module = bootstrap
+
+[Documentation]
+Author = Henry Kon
+Version = 0.1
+Website = https://www.aptlabs.xyz/
+Description = Bootstrap token escrow status
