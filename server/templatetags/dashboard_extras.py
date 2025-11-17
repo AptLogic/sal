@@ -1,7 +1,7 @@
 import json
 import time
 import datetime
-from distutils.version import LooseVersion
+from packaging import version
 
 import dateutil.parser
 
@@ -59,7 +59,7 @@ def cat(arg1, arg2):
 
 @register.filter
 def macos(os_version):
-    if LooseVersion(os_version) > LooseVersion("10.11.99"):
+    if version.parse(os_version) > version.parse("10.11.99"):
         return "macOS"
     else:
         return "OS X"
