@@ -11,7 +11,8 @@ def main():
     filevault = fv_status()
     sip = sip_status()
     gatekeeper = gatekeeper_status()
-    data = {'Filevault': filevault, 'SIP': sip, 'Gatekeeper': gatekeeper}
+    bootstrap = bootstrap_status()
+    data = {'Filevault': filevault, 'SIP': sip, 'Gatekeeper': gatekeeper, 'Bootstrap Token': bootstrap}
     sal.add_plugin_results('MachineDetailSecurity', data)
 
 
@@ -29,6 +30,9 @@ def gatekeeper_status():
     cmd = ['/usr/sbin/spctl', '--status']
     return get_status(cmd, 'assessments enabled', '/usr/sbin/spctl')
 
+def bootstrap_status():
+    cmd = ['/usr/bin/profiles', 'status', '-type', 'bootstraptoken']
+    return get_status(cmd, 'supported on server: YES', '/usr/bin/profiles')
 
 def get_status(cmd, checkstring, test=''):
     if test and not os.path.exists(test):

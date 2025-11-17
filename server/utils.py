@@ -28,7 +28,7 @@ from utils.text_utils import safe_text
 
 PLUGIN_ORDER = [
     'Activity', 'Status', 'OperatingSystem', 'MunkiVersion', 'Uptime', 'Memory', 'DiskSpace',
-    'PendingAppleUpdates', 'Pending3rdPartyUpdates', 'Encryption', 'Gatekeeper', 'Sip',
+    'PendingAppleUpdates', 'Pending3rdPartyUpdates', 'Encryption', 'Gatekeeper', 'Sip', 'Bootstrap',
     'XprotectVersion']
 PLUGIN_MODELS = {'machines': (Plugin, Widget), 'report': (Report, ReportPlugin),
                  'machine_detail': (MachineDetailPlugin, DetailPlugin)}
