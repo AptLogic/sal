@@ -124,6 +124,8 @@ def search_machines(search_id, machines, full=False):
                 '<=': '__lte',
                 '>': '__gt',
                 '>=': '__gte',
+                'Starts with': '__istartswith',
+                'Ends with': '__iendswith',
             }
             for display_operator, actual_operator in operators.items():
                 if search_row.operator == display_operator:

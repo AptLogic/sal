@@ -62,6 +62,8 @@ class SearchRow(models.Model):
         ('<=', '<='),
         ('>', '>'),
         ('>=', '>='),
+        ('Starts with', 'Starts with'),
+        ('Ends with', 'Ends with'),
     )
     id = models.BigAutoField(primary_key=True)
     search_group = models.ForeignKey(SearchGroup, on_delete=models.CASCADE)
@@ -70,7 +72,7 @@ class SearchRow(models.Model):
     search_field = models.CharField(max_length=254)
     and_or = models.CharField(choices=AND_OR_CHOICES, default='AND',
                               max_length=3, verbose_name='AND / OR')
-    operator = models.CharField(choices=SEARCH_OPERATOR_CHOICES, default='Contains', max_length=9)
+    operator = models.CharField(choices=SEARCH_OPERATOR_CHOICES, default='Contains', max_length=20)
     search_term = models.CharField(max_length=254)
     position = models.IntegerField()
 
