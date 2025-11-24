@@ -6,7 +6,7 @@ import pathlib
 import plistlib
 import time
 import xml.etree.ElementTree as ET
-from packaging import version
+from packaging.version import parse
 from itertools import chain
 
 import requests
@@ -156,7 +156,7 @@ def check_version():
     current_release_version = get_current_release_version_number() or '0.0.0'
 
     # Only do something if running version is out of date.
-    if version.parse(current_release_version) > version.parse(server_version):
+    if parse(current_release_version) > parse(server_version):
         # Determine whether to notify, or just not bother.
         next_notify_date = get_setting('next_notify_date', '0')
         if next_notify_date == 'never':
