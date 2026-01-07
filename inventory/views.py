@@ -3,7 +3,7 @@ import collections
 import copy
 import hashlib
 import itertools
-from packaging.version import parse
+import packaging
 from urllib.parse import quote
 
 # Django
@@ -397,7 +397,7 @@ class ApplicationDetailView(DetailView, GroupMixin):
             paths = {item["path"] for item in details}
 
             # We need to sort the versions for non-Postgres.
-            versions = sorted(list(versions), key=lambda v: parse(v))
+            versions = sorted(list(versions), key=lambda v: packaging.version.parse(v))
 
         return (versions, paths)
 

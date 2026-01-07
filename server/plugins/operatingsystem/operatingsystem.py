@@ -1,6 +1,7 @@
 import urllib
+
+import packaging
 from collections import defaultdict, OrderedDict
-from packaging.version import Version, parse
 
 from django.db.models import Count
 
@@ -65,7 +66,7 @@ class OperatingSystem(sal.plugin.Widget):
 
             grouped['Chrome OS'] = chrome_items
         # you and your lambdas @sheacraig...
-        os_key = lambda x: parse(x["operating_system"])  # noqa: E731
+        os_key = lambda x: packaging.version.parse(x["operating_system"])  # noqa: E731
         output = [
             (key, sorted(grouped[key], key=os_key, reverse=True)) for key in OS_TABLE.values()]
         context['os_info'] = output
