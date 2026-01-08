@@ -1,4 +1,5 @@
 import urllib
+import re
 
 import packaging
 from collections import defaultdict, OrderedDict
@@ -65,6 +66,33 @@ class OperatingSystem(sal.plugin.Widget):
                     chrome_items.append(item_to_add)
 
             grouped['Chrome OS'] = chrome_items
+        # Normalize macOS security revision versions like "26.3 (a)" -> "26.3.post1"
+            mac_items = []
+            mac_pattern = re.compile(r'^\s*(?P<version>[0-9]+(?:\.[0-9]+)*)\s*\((?P<rev>[a-zA-Z])\)\s*$')
+            for mac_item in grouped.get('macOS', []):
+                m = mac_pattern.match(mac_item['operating_system'])
+                if m:
+                    base_version = m.group('version')
+                    rev_letter = m.group('rev').lower()
+                    post_num = ord(rev_letter) - ord('a') + 1
+                    version_string = f"{base_version}.post{post_num}"
+                else:
+                    version_string = mac_item['operating_system']
+
+                found = False
+                for item in mac_items:
+                    if item['operating_system'] == version_string:
+                        item['count'] = item['count'] + mac_item['count']
+                        found = True
+                        break
+                if not found:
+                    item_to_add = {}
+                    item_to_add['operating_system'] = version_string
+                    item_to_add['os_family'] = 'Darwin'
+                    item_to_add['count'] = mac_item['count']
+                    mac_items.append(item_to_add)
+
+            grouped['macOS'] = mac_items
         # you and your lambdas @sheacraig...
         os_key = lambda x: packaging.version.parse(x["operating_system"])  # noqa: E731
         output = [
@@ -85,6 +113,16 @@ class OperatingSystem(sal.plugin.Widget):
                 operating_system__startswith=operating_system,
                 os_family=os_family
             )
+        elif os_family == 'Darwin':
+            # convert macOS versions with security revisions back to original format
+            mac_pattern = re.compile(r'^\s*(?P<version>[0-9]+(?:\.[0-9]+)*)\.post(?P<rev>[0-9]+)\s*$')
+            m = mac_pattern.match(operating_system)
+            if m:
+                base_version = m.group('version')
+                post_num = int(m.group('rev'))
+                rev_letter = chr(ord('a') + post_num - 1)
+                operating_system = f"{base_version} ({rev_letter})"
+            machines = machines.filter(operating_system=operating_system, os_family=os_family)
         else:
             machines = machines.filter(operating_system=operating_system, os_family=os_family)
         return machines, 'Machines running {} {}'.format(OS_TABLE[os_family], operating_system)
