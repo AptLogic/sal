@@ -1,15 +1,10 @@
-from django.db.models import Q
-
 import sal.plugin
-
 
 TITLES = {
     'ok': 'Machines with Bootstrap supported and token escrowed',
     'not_supported': 'Machines without MDM Bootstrap support',
     'supported_not_escrowed': 'Machines with Bootstrap supported but token not escrowed',
     'unknown': 'Machines with unknown Bootstrap status'}
-PLUGIN_Q = Q(pluginscriptsubmission__plugin='Bootstrap')
-SCRIPT_Q = Q(pluginscriptsubmission__pluginscriptrow__pluginscript_name='Bootstrap')
 
 
 class Bootstrap(sal.plugin.Widget):
@@ -33,24 +28,34 @@ class Bootstrap(sal.plugin.Widget):
     def _filter(self, machines, data):
         machines = machines.filter(os_family='Darwin')
         if data == 'ok':
+            # Bootstrap supported and token escrowed
             machines = (
                 machines
-                .filter(PLUGIN_Q,
-                        SCRIPT_Q,
-                        pluginscriptsubmission__pluginscriptrow__pluginscript_data='Supported, Escrowed'))
+                .filter(pluginscriptsubmission__plugin='MachineDetailSecurity',
+                        pluginscriptsubmission__pluginscriptrow__pluginscript_name='Bootstrap Server',
+                        pluginscriptsubmission__pluginscriptrow__pluginscript_data='Enabled')
+                .filter(pluginscriptsubmission__plugin='MachineDetailSecurity',
+                        pluginscriptsubmission__pluginscriptrow__pluginscript_name='Bootstrap Escrow',
+                        pluginscriptsubmission__pluginscriptrow__pluginscript_data='Enabled'))
         elif data == 'not_supported':
+            # Bootstrap not supported
             machines = (
                 machines
-                .filter(PLUGIN_Q,
-                        SCRIPT_Q,
-                        pluginscriptsubmission__pluginscriptrow__pluginscript_data='Not Supported'))
+                .filter(pluginscriptsubmission__plugin='MachineDetailSecurity',
+                        pluginscriptsubmission__pluginscriptrow__pluginscript_name='Bootstrap Server',
+                        pluginscriptsubmission__pluginscriptrow__pluginscript_data='Disabled'))
         elif data == 'supported_not_escrowed':
+            # Bootstrap supported but token not escrowed
             machines = (
                 machines
-                .filter(PLUGIN_Q,
-                        SCRIPT_Q,
-                        pluginscriptsubmission__pluginscriptrow__pluginscript_data='Supported, Not Escrowed'))
+                .filter(pluginscriptsubmission__plugin='MachineDetailSecurity',
+                        pluginscriptsubmission__pluginscriptrow__pluginscript_name='Bootstrap Server',
+                        pluginscriptsubmission__pluginscriptrow__pluginscript_data='Enabled')
+                .filter(pluginscriptsubmission__plugin='MachineDetailSecurity',
+                        pluginscriptsubmission__pluginscriptrow__pluginscript_name='Bootstrap Escrow',
+                        pluginscriptsubmission__pluginscriptrow__pluginscript_data='Disabled'))
         elif data == 'unknown':
+            # Unknown bootstrap status
             machines = (
                 machines
                 .exclude(pk__in=self._filter(machines, 'ok').values('pk'))

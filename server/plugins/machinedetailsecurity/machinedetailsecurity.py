@@ -45,20 +45,32 @@ class MachineDetailSecurity(sal.plugin.DetailPlugin):
             gatekeeper_status = 'Unknown'
 
         try:
-            bootstrap_status = (
+            bootstrap_server_status = (
                 PluginScriptRow.objects
                 .filter(submission__machine=machine,
                         submission__plugin='MachineDetailSecurity',
-                        pluginscript_name='Bootstrap')
+                        pluginscript_name='Bootstrap Server')
                 .order_by('submission__recorded')
                 .first().pluginscript_data)
         except AttributeError:
-            bootstrap_status = 'Unknown'
+            bootstrap_server_status = 'Unknown'
+
+        try:
+            bootstrap_escrow_status = (
+                PluginScriptRow.objects
+                .filter(submission__machine=machine,
+                        submission__plugin='MachineDetailSecurity',
+                        pluginscript_name='Bootstrap Escrow')
+                .order_by('submission__recorded')
+                .first().pluginscript_data)
+        except AttributeError:
+            bootstrap_escrow_status = 'Unknown'
 
         context['fv_status'] = fv_status
         context['sip_status'] = sip_status
         context['gatekeeper_status'] = gatekeeper_status
-        context['bootstrap_status'] = bootstrap_status
+        context['bootstrap_server_status'] = bootstrap_server_status
+        context['bootstrap_escrow_status'] = bootstrap_escrow_status
         return context
 
     def filter(self, machines, data):

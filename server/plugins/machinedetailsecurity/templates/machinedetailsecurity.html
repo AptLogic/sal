@@ -20,6 +20,22 @@
         {% elif sip_status == 'Disabled' %}glyphicon-ban-circle text-danger
         {% else %}glyphicon-warning-sign text-warning{% endif %}"
         aria-hidden="true"></span> {{ sip_status }}</dd>
+      <dt>Bootstrap Support</dt>
+      <dd><span class="glyphicon 
+        {% if bootstrap_server_status == 'Enabled' %}glyphicon-ok text-success
+        {% elif bootstrap_server_status == 'Disabled' %}glyphicon-ban-circle text-danger
+        {% else %}glyphicon-warning-sign text-warning{% endif %}"
+        aria-hidden="true"></span> {% if bootstrap_server_status == 'Enabled' %}Supported
+        {% elif bootstrap_server_status == 'Disabled' %}Not Supported
+        {% else %}Unknown{% endif %}</dd>
+      <dt>Bootstrap Escrow</dt>
+      <dd><span class="glyphicon 
+        {% if bootstrap_escrow_status == 'Enabled' %}glyphicon-ok text-success
+        {% elif bootstrap_escrow_status == 'Disabled' %}glyphicon-ban-circle text-danger
+        {% else %}glyphicon-warning-sign text-warning{% endif %}"
+        aria-hidden="true"></span> {% if bootstrap_escrow_status == 'Enabled' %}Escrowed
+        {% elif bootstrap_escrow_status == 'Disabled' %}Not Escrowed
+        {% else %}Unknown{% endif %}</dd>
     </dl>
   </div>
 </div>

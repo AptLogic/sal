@@ -1,38 +1,36 @@
 #!/usr/local/sal/Python.framework/Versions/Current/bin/python3
-
-
 import os
 import subprocess
-
 import sal
-
 
 def main():
     filevault = fv_status()
     sip = sip_status()
     gatekeeper = gatekeeper_status()
-    bootstrap = bootstrap_status()
-    data = {'Filevault': filevault, 'SIP': sip, 'Gatekeeper': gatekeeper, 'Bootstrap Token': bootstrap}
+    bootstrap_server = bootstrap_server_status()
+    bootstrap_escrow = bootstrap_escrow_status()
+    data = {'Filevault': filevault, 'SIP': sip, 'Gatekeeper': gatekeeper, 'Bootstrap Server': bootstrap_server, 'Bootstrap Escrow': bootstrap_escrow}
     sal.add_plugin_results('MachineDetailSecurity', data)
-
 
 def fv_status():
     cmd = ['/usr/bin/fdesetup', 'status']
     return get_status(cmd, 'FileVault is On.', '/usr/bin/fdesetup')
 
-
 def sip_status():
     cmd = ['/usr/bin/csrutil', 'status']
     return get_status(cmd, 'System Integrity Protection status: enabled.', '/usr/bin/csrutil')
-
 
 def gatekeeper_status():
     cmd = ['/usr/sbin/spctl', '--status']
     return get_status(cmd, 'assessments enabled', '/usr/sbin/spctl')
 
-def bootstrap_status():
+def bootstrap_server_status():
     cmd = ['/usr/bin/profiles', 'status', '-type', 'bootstraptoken']
     return get_status(cmd, 'supported on server: YES', '/usr/bin/profiles')
+
+def bootstrap_escrow_status():
+    cmd = ['/usr/bin/profiles', 'status', '-type', 'bootstraptoken']
+    return get_status(cmd, 'escrowed to server: YES', '/usr/bin/profiles')
 
 def get_status(cmd, checkstring, test=''):
     if test and not os.path.exists(test):
@@ -45,7 +43,6 @@ def get_status(cmd, checkstring, test=''):
         status = 'Enabled' if checkstring in output else 'Disabled'
 
     return status
-
 
 if __name__ == '__main__':
     main()
