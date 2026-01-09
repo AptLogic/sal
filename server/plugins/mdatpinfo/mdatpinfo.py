@@ -27,7 +27,18 @@ class MDATPInfo(sal.plugin.DetailPlugin):
             pass
         return None
 
+    def _has_any_data(self):
+        """Return True if any machine has reported facts from the salmdatp management source."""
+        try:
+            return Fact.objects.filter(management_source__name="salmdatp").exists()
+        except Exception:
+            return False
+
     def get_context(self, machine, **kwargs):
+        # If no device in the database has reported MDATP facts, don't render this plugin
+        if not self._has_any_data():
+            return None
+
         context = self.super_get_context(machine, **kwargs)
 
         # Basic health and version info
@@ -99,6 +110,9 @@ class MDATPInfo(sal.plugin.DetailPlugin):
         context.setdefault("engine_version", context.get("engine_version", "Unknown"))
         context.setdefault("definitions_version", context.get("definitions_version", "Unknown"))
         context.setdefault("managed_by", context.get("managed_by", "Unknown"))
+
+        # Indicate to the template that MDATP data exists somewhere in the DB
+        context["mdatp_available"] = True
 
         return context
 
