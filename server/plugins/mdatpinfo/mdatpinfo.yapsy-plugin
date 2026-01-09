@@ -1,0 +1,7 @@
+[Core]
+Name = MDATPInfo
+Module = mdatpinfo
+
+[Documentation]
+Author = Auto-generated
+Version = 0.1

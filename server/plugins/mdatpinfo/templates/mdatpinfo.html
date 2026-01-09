@@ -1,0 +1,132 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <style>
+      .mdatp-panel dl.dl-horizontal { overflow-x: auto; }
+      .mdatp-panel dt { word-break: break-word; }
+      .mdatp-panel dd { word-break: break-word; overflow-wrap: break-word; }
+      .mdatp-status { display: inline-block; vertical-align: middle; }
+      .mdatp-status-ok { color: #5cb85c; }
+      .mdatp-status-fail { color: #d9534f; }
+      .mdatp-status-badge { padding: 3px 8px; font-size: 11px; font-weight: 600; }
+      .mdatp-section-title { margin: 10px 0 8px 0; font-size: 13px; font-weight: 600; }
+      .mdatp-section-title:first-child { margin-top: 0; }
+      .mdatp-endpoints-container { width: 100%; overflow-x: hidden; }
+      .mdatp-endpoint-item { display: block; margin-bottom: 5px; word-break: break-word; }
+      .mdatp-endpoint-url { 
+        display: block; 
+        word-break: break-all; 
+        background-color: #f5f5f5; 
+        padding: 4px 6px; 
+        border-radius: 3px;
+        margin-bottom: 3px;
+        font-size: 12px;
+        white-space: pre-wrap;
+      }
+      .mdatp-endpoint-url.failed { background-color: #fff5f5; }
+      .mdatp-endpoint-badge { display: inline-block; margin-top: 3px; padding: 2px 6px; font-size: 11px; }
+      .mdatp-toggle-btn {
+        background-color: #f5f5f5;
+        border: 1px solid #ddd;
+        padding: 6px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 13px;
+        display: inline-block;
+        transition: all 0.3s ease;
+      }
+      .mdatp-toggle-btn:hover {
+        background-color: #e8e8e8;
+      }
+      .mdatp-endpoints-list {
+        display: none;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #ddd;
+      }
+      .mdatp-endpoints-list.show {
+        display: block;
+      }
+      .mdatp-small-text { color: #999; font-size: 12px; }
+    </style>
+    
+    <dl class="dl-horizontal mdatp-panel">
+      <legend><h5 class"text-uppercase">{{ plugin.title }}</h5></legend>
+
+      <dt>Health</dt>
+      <dd>
+        <span class="mdatp-status {% if healthy == True or healthy == 'True' or healthy == 'true' or healthy == '1' %}mdatp-status-ok{% elif healthy == False or healthy == 'False' or healthy == 'false' or healthy == '0' %}mdatp-status-fail{% endif %}">
+          <span class="glyphicon {% if healthy == True or healthy == 'True' or healthy == 'true' or healthy == '1' %}glyphicon-ok{% elif healthy == False or healthy == 'False' or healthy == 'false' or healthy == '0' %}glyphicon-remove{% else %}glyphicon-question-sign{% endif %}" aria-hidden="true"></span>
+          {% if healthy == True or healthy == 'True' or healthy == 'true' or healthy == '1' %}Healthy{% elif healthy == False or healthy == 'False' or healthy == 'false' or healthy == '0' %}Unhealthy{% else %}{{ healthy }}{% endif %}
+        </span>
+      </dd>
+
+      <dt>Managed By</dt>
+      <dd>{{ managed_by }}</dd>
+
+      <dt>App Version</dt>
+      <dd>{{ app_version }}</dd>
+
+      <dt>Engine Version</dt>
+      <dd>{{ engine_version }}</dd>
+
+      <dt>Definitions</dt>
+      <dd>{{ definitions_version }}
+        <span class="label mdatp-status-badge {% if definitions_status == 'up_to_date' or definitions_status == 'Up to date' %}label-success{% elif definitions_status == 'out_of_date' or definitions_status == 'Out of date' %}label-warning{% else %}label-info{% endif %}">{{ definitions_status }}</span>
+        <small class="mdatp-small-text">Updated: {{ definitions_updated }}</small></dd>
+
+      <dt>Real-time Protection</dt>
+      <dd>{{ real_time_protection_enabled }}</dd> 
+
+      <dt>Connectivity</dt>
+      <dd>
+        OK: {{ connectivity_ok }} &nbsp; Failed: {{ connectivity_failed }} &nbsp; Total: {{ connectivity_total }}
+      </dd>
+
+      <dt>Endpoints</dt>
+      <dd>
+        <div class="mdatp-endpoints-container">
+          {% if endpoints_ok or endpoints_failed %}
+            <button type="button" class="mdatp-toggle-btn" onclick="this.nextElementSibling.classList.toggle('show'); this.textContent = this.nextElementSibling.classList.contains('show') ? '▼ Hide Endpoints' : '▶ Show Endpoints';">
+              ▶ Show Endpoints
+            </button>
+            <div class="mdatp-endpoints-list">
+              {% if endpoints_ok %}
+                <div class="mdatp-section-title mdatp-status-ok"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Connected ({{ endpoints_ok|length }})</div>
+                <div style="margin-bottom: 15px;">
+                  {% for ep in endpoints_ok|slice:":10" %}
+                    <div class="mdatp-endpoint-item">
+                      <code class="mdatp-endpoint-url">{{ ep.url }}</code>
+                      <span class="label label-success mdatp-endpoint-badge">{{ ep.status }}</span>
+                    </div>
+                  {% endfor %}
+                </div>
+                {% if endpoints_ok|length > 10 %}
+                  <small class="mdatp-small-text">Showing first 10 of {{ endpoints_ok|length }} connected endpoints</small>
+                {% endif %}
+              {% endif %}
+
+              {% if endpoints_failed %}
+                <div class="mdatp-section-title mdatp-status-fail" style="margin-top: {% if endpoints_ok %}15px{% else %}0{% endif %};"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Failed ({{ endpoints_failed|length }})</div>
+                <div>
+                  {% for ep in endpoints_failed|slice:":10" %}
+                    <div class="mdatp-endpoint-item">
+                      <code class="mdatp-endpoint-url failed">{{ ep.url }}</code>
+                      <span class="label label-danger mdatp-endpoint-badge">{{ ep.status }}</span>
+                    </div>
+                  {% endfor %}
+                </div>
+                {% if endpoints_failed|length > 10 %}
+                  <small class="mdatp-small-text">Showing first 10 of {{ endpoints_failed|length }} failed endpoints</small>
+                {% endif %}
+              {% endif %}
+            </div>
+          {% else %}
+            <em>No endpoint data</em>
+          {% endif %}
+        </div>
+      </dd>
+
+    </dl>
+  </div>
+</div>
