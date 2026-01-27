@@ -66,11 +66,23 @@ class MachineDetailSecurity(sal.plugin.DetailPlugin):
         except AttributeError:
             bootstrap_escrow_status = 'Unknown'
 
+        try:
+            psso_device_status = (
+                PluginScriptRow.objects
+                .filter(submission__machine=machine,
+                        submission__plugin='MachineDetailSecurity',
+                        pluginscript_name='PSSO Device Status')
+                .order_by('submission__recorded')
+                .first().pluginscript_data)
+        except AttributeError:
+            psso_device_status = 'Unknown'
+
         context['fv_status'] = fv_status
         context['sip_status'] = sip_status
         context['gatekeeper_status'] = gatekeeper_status
         context['bootstrap_server_status'] = bootstrap_server_status
         context['bootstrap_escrow_status'] = bootstrap_escrow_status
+        context['psso_device_status'] = psso_device_status
         return context
 
     def filter(self, machines, data):

@@ -36,6 +36,14 @@
         aria-hidden="true"></span> {% if bootstrap_escrow_status == 'Enabled' %}Escrowed
         {% elif bootstrap_escrow_status == 'Disabled' %}Not Escrowed
         {% else %}Unknown{% endif %}</dd>
+      <dt>Platform SSO</dt>
+      <dd><span class="glyphicon 
+        {% if psso_device_status == 'Enabled' %}glyphicon-ok text-success
+        {% elif psso_device_status == 'Disabled' %}glyphicon-ban-circle text-danger
+        {% else %}glyphicon-warning-sign text-warning{% endif %}"
+        aria-hidden="true"></span> {% if psso_device_status == 'Enabled' %}Enabled
+        {% elif psso_device_status == 'Disabled' %}Disabled
+        {% else %}Unknown{% endif %}</dd>
     </dl>
   </div>
 </div>

@@ -9,7 +9,8 @@ def main():
     gatekeeper = gatekeeper_status()
     bootstrap_server = bootstrap_server_status()
     bootstrap_escrow = bootstrap_escrow_status()
-    data = {'Filevault': filevault, 'SIP': sip, 'Gatekeeper': gatekeeper, 'Bootstrap Server': bootstrap_server, 'Bootstrap Escrow': bootstrap_escrow}
+    psso_enabled = psso_device_status()
+    data = {'Filevault': filevault, 'SIP': sip, 'Gatekeeper': gatekeeper, 'Bootstrap Server': bootstrap_server, 'Bootstrap Escrow': bootstrap_escrow, 'PSSO Device Status': psso_enabled}
     sal.add_plugin_results('MachineDetailSecurity', data)
 
 def fv_status():
@@ -31,6 +32,10 @@ def bootstrap_server_status():
 def bootstrap_escrow_status():
     cmd = ['/usr/bin/profiles', 'status', '-type', 'bootstraptoken']
     return get_status(cmd, 'escrowed to server: YES', '/usr/bin/profiles')
+
+def psso_device_status():
+    cmd = ['/usr/bin/app-sso', 'platform', '-s']
+    return get_status(cmd, '_deviceSigningKeyData', '/usr/bin/app-sso')
 
 def get_status(cmd, checkstring, test=''):
     if test and not os.path.exists(test):
