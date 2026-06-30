@@ -28,19 +28,10 @@ class Uptime(sal.plugin.Widget):
     def get_context(self, queryset, **kwargs):
         context = self.super_get_context(queryset, **kwargs)
 
-        # Single aggregated query replaces 3 separate count queries
-        counts = queryset.filter(PLUGIN_Q).aggregate(
-            ok_count=Count('id', filter=Q(pluginscriptsubmission__pluginscriptrow__pluginscript_data__lt=30)),
-            warning_count=Count('id', filter=Q(
-                pluginscriptsubmission__pluginscriptrow__pluginscript_data__lt=90,
-                pluginscriptsubmission__pluginscriptrow__pluginscript_data__gte=30
-            )),
-            alert_count=Count('id', filter=Q(
-                pluginscriptsubmission__pluginscriptrow__pluginscript_data__gte=90
-            )),
-        )
+        context['ok_count'] = self._filter(queryset, 'ok').count()
+        context['warning_count'] = self._filter(queryset, 'warning').count()
+        context['alert_count'] = self._filter(queryset, 'alert').count()
 
-        context.update(counts)
         context.update({
             'ok_label': '< 30 Days',
             'warning_label': '< 90 Days',
