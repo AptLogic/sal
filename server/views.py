@@ -187,7 +187,10 @@ def really_delete_business_unit(request, bu_id):
 @access_required(BusinessUnit)
 def bu_dashboard(request, **kwargs):
     business_unit = kwargs['business_unit']
-    machine_groups = business_unit.machinegroup_set.all()
+    # Pre-compute machine counts to avoid N+1 queries in template
+    machine_groups = business_unit.machinegroup_set.annotate(
+        machine_count=Count('machine', filter=Q(machine__deployed=True))
+    )
 
     # Load in the default plugins if needed
     utils.load_default_plugins()

@@ -205,11 +205,14 @@ class BasePlugin(IPlugin):
         # Check access before doing anything else.
         handle_access(request, group_type, group_id)
 
-        queryset = self.model.objects.filter(os_family__in=self.get_supported_os_families())
+        # Use select_related to avoid N+1 queries when accessing machine_group
+        queryset = self.model.objects.select_related('machine_group').filter(
+            os_family__in=self.get_supported_os_families()
+        )
 
         # By default, plugins filter out undeployed machines.
         if self.only_use_deployed_machines:
-            queryset = self.model.objects.filter(deployed=True)
+            queryset = self.model.objects.select_related('machine_group').filter(deployed=True)
 
         if group_type == "business_unit":
             queryset = queryset.filter(machine_group__business_unit__pk=group_id)
