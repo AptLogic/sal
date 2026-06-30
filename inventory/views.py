@@ -403,14 +403,18 @@ class ApplicationDetailView(DetailView, GroupMixin):
 
     def _build_context_data(self, context, details, versions, paths):
         # Get list of dicts of installed versions and number of installs
-        # for each.
+        # for each. Use a single annotated query instead of filter().count() in loop
+        from django.db.models import Count, Case, When
+        
+        version_counts = details.values('version').annotate(count=Count('id')).order_by('version')
         context["versions"] = [
-            {"version": version, "count": details.filter(version=version).count()} for version in
-            versions]
-        # Get list of dicts of installation locations and number of
-        # installs for each.
+            {"version": item['version'], "count": item['count']} for item in version_counts]
+        
+        # Get list of dicts of installation locations and number of installs for each.
+        path_counts = details.values('path').annotate(count=Count('id')).order_by('path')
         context["paths"] = [
-            {"path": path, "count": details.filter(path=path).count()} for path in paths]
+            {"path": item['path'], "count": item['count']} for item in path_counts]
+        
         # Get the total number of installations.
         context["install_count"] = details.count()
         # Add in access data.

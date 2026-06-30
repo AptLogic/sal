@@ -102,7 +102,8 @@ def tableajax(request, plugin_name, data, group_type="all", group_id=None):
     else:
         searched_machines = machines.order_by(order_string)
 
-    limited_machines = searched_machines[start : (start + length)]
+    # Use database-level limit/offset instead of Python slicing
+    limited_machines = list(searched_machines[start : (start + length)])
 
     return_data = {}
     return_data["title"] = title
@@ -189,9 +190,11 @@ def preflight_v2(request):
     # Old Sal scripts just do a GET; just send everything in that case.
     os_family = None if request.method != "POST" else request.POST.get("os_family")
 
-    enabled_reports = Report.objects.all()
-    enabled_plugins = Plugin.objects.all()
-    enabled_detail_plugins = MachineDetailPlugin.objects.all()
+    # Use cached plugin lists instead of loading from database
+    enabled_reports = server.utils._get_cached_enabled_plugins(Report, 'enabled_reports')
+    enabled_plugins = server.utils._get_cached_enabled_plugins(Plugin, 'enabled_plugins')
+    enabled_detail_plugins = server.utils._get_cached_enabled_plugins(
+        MachineDetailPlugin, 'enabled_detail_plugins')
     for enabled_plugin in itertools.chain(
         enabled_reports, enabled_plugins, enabled_detail_plugins
     ):
@@ -553,5 +556,9 @@ def _bulk_create_or_iterate_save(objects, model):
     if objects and IS_POSTGRES:
         model.objects.bulk_create(objects)
     else:
-        for item in objects:
-            item.save()
+        # For non-Postgres, batch saves in chunks to reduce peak memory
+        batch_size = 100
+        for i in range(0, len(objects), batch_size):
+            chunk = objects[i:i + batch_size]
+            for item in chunk:
+                item.save()

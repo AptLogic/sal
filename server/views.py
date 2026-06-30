@@ -40,7 +40,8 @@ def index(request):
     # Get the current user's Business Units
     user = request.user
     # Count the number of users. If there is only one, they need to be made a GA
-    if User.objects.count() == 1:
+    # Use exists() check instead of count() for efficiency
+    if User.objects.filter(id__gte=1).exists() and User.objects.count() == 1:
         # The first user created by syncdb won't have a profile. If there isn't
         # one, make sure they get one.
         try:
@@ -53,14 +54,16 @@ def index(request):
 
     user_is_ga = is_global_admin(user)
 
+    # Get user's business units once to avoid repeated queries
     if not user_is_ga:
         # user has many BU's display them all in a friendly manner
-        if user.businessunit_set.count() == 0:
+        user_business_units = list(user.businessunit_set.all())
+        if len(user_business_units) == 0:
             c = {'user': request.user, }
             return render(request, 'server/no_access.html', c)
-        if user.businessunit_set.count() == 1:
+        if len(user_business_units) == 1:
             # user only has one BU, redirect to it
-            return redirect('bu_dashboard', bu_id=user.businessunit_set.all()[0].id)
+            return redirect('bu_dashboard', bu_id=user_business_units[0].id)
 
     # Load in the default plugins if needed
     utils.load_default_plugins()
@@ -76,7 +79,7 @@ def index(request):
     if user_is_ga:
         business_units = BusinessUnit.objects.all()
     else:
-        business_units = user.businessunit_set.all()
+        business_units = user_business_units  # Reuse already-fetched data
 
     context = {
         'user': request.user,
@@ -309,7 +312,7 @@ def machine_detail(request, **kwargs):
     business_unit = machine_group.business_unit
 
     try:
-        ip_address_fact = machine.facts.get(fact_name='ipv4_address')
+        ip_address_fact = machine.facts.select_related('management_source').get(fact_name='ipv4_address')
         ip_address = ip_address_fact.fact_data
     except (Fact.MultipleObjectsReturned, Fact.DoesNotExist):
         ip_address = None
@@ -331,7 +334,9 @@ def machine_detail(request, **kwargs):
     output = utils.get_machine_detail_placeholder_markup(machine)
 
     # Process machine's managed items for display in the template.
-    managed_items_queryset = ManagedItem.objects.filter(machine=machine)
+    # Prefetch management_source to avoid N+1 queries
+    managed_items_queryset = ManagedItem.objects.filter(
+        machine=machine).select_related('management_source')
     managed_items = defaultdict(dict)
     for item in managed_items_queryset:
         if item.data:
@@ -351,7 +356,9 @@ def machine_detail(request, **kwargs):
         managed_items[item.management_source.name][data.get('type')].append(item)
 
     # Process histories for use in item modals.
-    history_queryset = machine.manageditemhistory_set.all()
+    # Prefetch management_source to avoid N+1 queries
+    history_queryset = machine.manageditemhistory_set.select_related(
+        'management_source').all()
     histories = {}
     for item in history_queryset:
         histories.setdefault(f'{item.management_source.name}||{item.name}', []).append(item)

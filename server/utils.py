@@ -12,6 +12,7 @@ from itertools import chain
 import requests
 
 from django.conf import settings
+from django.core.cache import cache
 # from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.exceptions import ValidationError
 from django.db import connection
@@ -465,10 +466,29 @@ def get_plugin_scripts(plugin, hash_only=False, script_name=None):
     return results
 
 
+def _get_cached_enabled_plugins(model_class, cache_key):
+    """Get enabled plugins from cache or database.
+    
+    Args:
+        model_class: The plugin model class (Plugin, Report, MachineDetailPlugin)
+        cache_key: The cache key to use
+        
+    Returns:
+        List of plugin instances from cache or database (cached for 3600 seconds)
+    """
+    plugins = cache.get(cache_key)
+    if plugins is None:
+        plugins = list(model_class.objects.all())
+        cache.set(cache_key, plugins, timeout=3600)  # Cache for 1 hour
+    return plugins
+
+
 def run_plugin_processing(machine, report_data):
-    enabled_reports = Report.objects.all()
-    enabled_plugins = Plugin.objects.all()
-    enabled_detail_plugins = MachineDetailPlugin.objects.all()
+    # Use cached plugin lists with 1-hour timeout
+    enabled_reports = _get_cached_enabled_plugins(Report, 'enabled_reports')
+    enabled_plugins = _get_cached_enabled_plugins(Plugin, 'enabled_plugins')
+    enabled_detail_plugins = _get_cached_enabled_plugins(
+        MachineDetailPlugin, 'enabled_detail_plugins')
     for enabled_plugin in itertools.chain(enabled_reports, enabled_plugins, enabled_detail_plugins):
         plugin = PluginManager.get_plugin_by_name(enabled_plugin.name)
         if plugin:
@@ -476,8 +496,10 @@ def run_plugin_processing(machine, report_data):
 
 
 def run_profiles_plugin_processing(machine, profiles_list):
-    enabled_plugins = Plugin.objects.all()
-    enabled_detail_plugins = MachineDetailPlugin.objects.all()
+    # Use cached plugin lists with 1-hour timeout
+    enabled_plugins = _get_cached_enabled_plugins(Plugin, 'enabled_plugins')
+    enabled_detail_plugins = _get_cached_enabled_plugins(
+        MachineDetailPlugin, 'enabled_detail_plugins')
     for enabled_plugin in itertools.chain(enabled_plugins, enabled_detail_plugins):
         plugin = PluginManager.get_plugin_by_name(enabled_plugin.name)
         if plugin:
@@ -507,12 +529,13 @@ def _update_plugin_record(model, found):
             refresh and clean.
         found (container): Names of plugins found by yapsy manager.
     """
-    all_plugins = model.objects.all()
+    # Use .values_list() to load only names instead of full objects, then use iterator
+    all_plugin_names = model.objects.all().values_list('id', 'name').iterator()
     # First, clean out all DB plugins that no-longer exist in plugins
     # folder.
-    for plugin in all_plugins:
-        if plugin.name not in found:
-            plugin.delete()
+    for plugin_id, plugin_name in all_plugin_names:
+        if plugin_name not in found:
+            model.objects.filter(id=plugin_id).delete()
 
 
 def get_active_and_inactive_plugins(plugin_kind='machines'):

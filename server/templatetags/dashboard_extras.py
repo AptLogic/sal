@@ -6,6 +6,7 @@ import packaging
 import dateutil.parser
 
 from django import template
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 
 import utils.text_utils
@@ -69,13 +70,13 @@ def macos(os_version):
 def bu_machine_count(bu_id):
     """Returns the number of machines contained within the child Machine Groups. Input is
     BusinessUnit.id"""
-    # Get the BusinessUnit
+    # Get the BusinessUnit and count deployed machines with a single annotated query
     business_unit = get_object_or_404(BusinessUnit, pk=bu_id)
-    machine_groups = business_unit.machinegroup_set.all()
-    count = 0
-    for machinegroup in machine_groups:
-        count = count + machinegroup.machine_set.filter(deployed=True).count()
-    return count
+    # Use a single query with Count aggregation instead of loop with separate counts
+    result = business_unit.machinegroup_set.aggregate(
+        count=Count('machine', filter=Q(machine__deployed=True))
+    )
+    return result['count']
 
 
 @register.filter

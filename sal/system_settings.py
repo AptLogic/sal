@@ -143,6 +143,12 @@ STATIC_ROOT = os.path.join(PROJECT_DIR, "static")
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = "/static/"
 
+# Cache static files for 1 year in production for faster subsequent loads
+STATIC_FILE_CACHE_TIMEOUT = 31536000  # 1 year in seconds
+
+# Session settings for efficient cookie-based sessions
+SESSION_COOKIE_AGE = 1209600  # 14 days
+
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
@@ -164,6 +170,7 @@ SECRET_KEY = "ppf%ls0f)mzkf#2dl-nbf^8f&=84py=y^u8^z-f559*d36y_@v"
 
 MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
+    "django.middleware.gzip.GZipMiddleware",  # Compress responses for faster delivery
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
